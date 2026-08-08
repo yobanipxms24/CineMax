@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Usuarios | CineMax+</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+
+    <style>
+        body {
+            min-height: 100vh;
+            background: #08070d;
+            color: white;
+        }
+
+        .sidebar {
+            min-height: 100vh;
+            background: #14111f;
+            border-right: 1px solid #302842;
+        }
+
+        .brand {
+            color: #a970ff;
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            color: #d7d2e5;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: 0.2s;
+        }
+
+        .menu-link:hover,
+        .menu-link.active {
+            background: #2a2142;
+            color: white;
+        }
+
+        .panel {
+            background: #14111f;
+            border: 1px solid #332a48;
+            border-radius: 20px;
+        }
+
+        .table {
+            --bs-table-bg: transparent;
+            --bs-table-color: #f4f0ff;
+            --bs-table-border-color: #332a48;
+        }
+
+        .table-hover tbody tr:hover {
+            --bs-table-hover-bg: #211a32;
+            --bs-table-hover-color: white;
+        }
+
+        .form-control,
+        .form-select {
+            background: #211d35;
+            color: white;
+            border-color: #3b3456;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background: #211d35;
+            color: white;
+            border-color: #9b67ff;
+            box-shadow: 0 0 0 .25rem rgba(155, 103, 255, .2);
+        }
+
+        .form-control::placeholder {
+            color: #928ba3;
+        }
+
+        .btn-purple {
+            background: linear-gradient(90deg, #7c3aed, #a855f7);
+            border: none;
+            color: white;
+        }
+
+        .btn-purple:hover {
+            color: white;
+            opacity: 0.9;
+        }
+
+        .modal-content {
+            background: #171320;
+            color: white;
+            border: 1px solid #3a3150;
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        .badge-activo {
+            background: rgba(34, 197, 94, 0.18);
+            color: #71e59a;
+        }
+
+        .badge-inactivo {
+            background: rgba(239, 68, 68, 0.18);
+            color: #ff8585;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+
+        <aside class="col-md-3 col-lg-2 sidebar p-4">
+            <div class="brand mb-5">CineMax+</div>
+
+            <a class="menu-link" href="{{ url_for('dashboard') }}">
+                <i class="bi bi-grid-fill"></i>
+                Dashboard
+            </a>
+
+            <a class="menu-link active" href="{{ url_for('usuarios') }}">
+                <i class="bi bi-people-fill"></i>
+                Usuarios
+            </a>
+
+            <a class="menu-link" href="{{ url_for('peliculas') }}">
+    <i class="bi bi-film"></i>
+    Películas
+</a>
+
+            <a class="menu-link" href="{{ url_for('series') }}">
+    <i class="bi bi-tv-fill"></i>
+    Series
+</a>
+
+            <a class="menu-link" href="{{ url_for('categorias') }}">
+                <i class="bi bi-tags-fill"></i>
+                Categorías
+            </a>
+
+            <a class="menu-link" href="{{ url_for('logout') }}">
+                <i class="bi bi-box-arrow-left"></i>
+                Cerrar sesión
+            </a>
+        </aside>
+
+        <main class="col-md-9 col-lg-10 p-4 p-lg-5">
+
+            {% set mensajes = get_flashed_messages(with_categories=true) %}
+
+            <div
+                class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4"
+            >
+                <div>
+                    <h1>Usuarios</h1>
+                    <p class="text-secondary mb-0">
+                        Administra las cuentas de acceso al sistema.
+                    </p>
+                </div>
+
+                <button
+                    class="btn btn-purple"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalNuevoUsuario"
+                >
+                    <i class="bi bi-person-plus-fill me-2"></i>
+                    Agregar usuario
+                </button>
+            </div>
+
+            <section class="panel p-4">
+
+                <form
+                    method="GET"
+                    action="{{ url_for('usuarios') }}"
+                    class="row g-3 mb-4"
+                >
+                    <div class="col-md-9">
+                        <input
+                            type="search"
+                            name="buscar"
+                            class="form-control"
+                            placeholder="Buscar por nombre, usuario, correo o rol"
+                            value="{{ buscar }}"
+                        >
+                    </div>
+
+                    <div class="col-md-3 d-grid">
+                        <button class="btn btn-outline-light">
+                            <i class="bi bi-search me-2"></i>
+                            Buscar
+                        </button>
+                    </div>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Usuario</th>
+                                <th>Correo</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for item in usuarios %}
+                                <tr>
+                                    <td>{{ item.id }}</td>
+                                    <td>{{ item.nombre }}</td>
+                                    <td>{{ item.usuario }}</td>
+                                    <td>{{ item.correo }}</td>
+                                    <td>{{ item.rol }}</td>
+
+                                    <td>
+                                        {% if item.estado %}
+                                            <span class="badge badge-activo">
+                                                Activo
+                                            </span>
+                                        {% else %}
+                                            <span class="badge badge-inactivo">
+                                                Inactivo
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="text-end">
+                                        <button
+                                            class="btn btn-sm btn-outline-info"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalEditar{{ item.id }}"
+                                            title="Editar"
+                                        >
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+
+                                        <form
+                                            method="POST"
+                                            action="{{ url_for('cambiar_estado_usuario', usuario_id=item.id) }}"
+                                            class="d-inline"
+                                        >
+                                            <button
+                                                class="btn btn-sm btn-outline-warning"
+                                                title="Activar o desactivar"
+                                            >
+                                                {% if item.estado %}
+                                                    <i class="bi bi-person-dash-fill"></i>
+                                                {% else %}
+                                                    <i class="bi bi-person-check-fill"></i>
+                                                {% endif %}
+                                            </button>
+                                        </form>
+
+                                        <form
+                                            method="POST"
+                                            action="{{ url_for('eliminar_usuario', usuario_id=item.id) }}"
+                                            class="d-inline form-eliminar"
+                                            data-nombre="{{ item.nombre }}"
+                                        >
+                                            <button
+                                                class="btn btn-sm btn-outline-danger"
+                                                title="Eliminar"
+                                            >
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+
+                                <div
+                                    class="modal fade"
+                                    id="modalEditar{{ item.id }}"
+                                    tabindex="-1"
+                                >
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <form
+                                                method="POST"
+                                                action="{{ url_for('editar_usuario', usuario_id=item.id) }}"
+                                                autocomplete="off"
+                                                data-form-type="other"
+                                            >
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">
+                                                        Editar usuario
+                                                    </h5>
+
+                                                    <button
+                                                        type="button"
+                                                        class="btn-close"
+                                                        data-bs-dismiss="modal"
+                                                    ></button>
+                                                </div>
+
+                                                <div class="modal-body">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">
+                                                                Nombre completo
+                                                            </label>
+
+                                                            <input
+                                                                type="text"
+                                                                name="nombre"
+                                                                class="form-control"
+                                                                value="{{ item.nombre }}"
+                                                                required
+                                                            >
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">
+                                                                Usuario
+                                                            </label>
+
+                                                            <input
+                                                                type="text"
+                                                                name="usuario"
+                                                                class="form-control"
+                                                                value="{{ item.usuario }}"
+                                                                required
+                                                            >
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">
+                                                                Correo
+                                                            </label>
+
+                                                            <input
+                                                                type="email"
+                                                                name="correo"
+                                                                class="form-control"
+                                                                value="{{ item.correo }}"
+                                                                required
+                                                            >
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">
+                                                                Rol
+                                                            </label>
+
+                                                            <select
+                                                                name="rol"
+                                                                class="form-select"
+                                                            >
+                                                                <option
+                                                                    value="Usuario"
+                                                                    {% if item.rol == 'Usuario' %}selected{% endif %}
+                                                                >
+                                                                    Usuario
+                                                                </option>
+
+                                                                <option
+                                                                    value="Administrador"
+                                                                    {% if item.rol == 'Administrador' %}selected{% endif %}
+                                                                >
+                                                                    Administrador
+                                                                </option>
+                                                            </select>
+                                                        </div>
+
+                                                        <div class="col-12">
+                                                            <label class="form-label">
+                                                                Nueva contraseña
+                                                            </label>
+
+                                                            <input
+                                                                type="password"
+                                                                name="clave_nueva"
+                                                                class="form-control"
+                                                                placeholder="Déjala vacía para conservar la actual"
+                                                                autocomplete="off"
+                                                                data-lpignore="true"
+                                                                data-1p-ignore="true"
+                                                                data-form-type="other"
+                                                            >
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="modal-footer">
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-outline-light"
+                                                        data-bs-dismiss="modal"
+                                                    >
+                                                        Cancelar
+                                                    </button>
+
+                                                    <button class="btn btn-purple">
+                                                        Guardar cambios
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-5">
+                                        No se encontraron usuarios.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNuevoUsuario" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <form
+                method="POST"
+                action="{{ url_for('crear_usuario') }}"
+                autocomplete="off"
+                data-form-type="other"
+            >
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Agregar usuario
+                    </h5>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                    ></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Nombre completo
+                            </label>
+
+                            <input
+                                type="text"
+                                name="nombre"
+                                class="form-control"
+                                required
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Usuario
+                            </label>
+
+                            <input
+                                type="text"
+                                name="usuario"
+                                class="form-control"
+                                required
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Correo
+                            </label>
+
+                            <input
+                                type="email"
+                                name="correo"
+                                class="form-control"
+                                required
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Rol
+                            </label>
+
+                            <select name="rol" class="form-select">
+                                <option value="Usuario">
+                                    Usuario
+                                </option>
+
+                                <option value="Administrador">
+                                    Administrador
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">
+                                Contraseña
+                            </label>
+
+                            <input
+                                type="password"
+                                name="clave_nueva"
+                                class="form-control"
+                                autocomplete="off"
+                                data-lpignore="true"
+                                data-1p-ignore="true"
+                                data-form-type="other"
+                                required
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button
+                        type="button"
+                        class="btn btn-outline-light"
+                        data-bs-dismiss="modal"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button class="btn btn-purple">
+                        Guardar usuario
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    const mensajes = {{ mensajes | default([]) | tojson }};
+
+    const configuracionPorCategoria = {
+        success: {
+            icon: "success",
+            title: "Operación realizada"
+        },
+        danger: {
+            icon: "error",
+            title: "Ocurrió un error"
+        },
+        warning: {
+            icon: "warning",
+            title: "Atención"
+        },
+        info: {
+            icon: "info",
+            title: "Información"
+        }
+    };
+
+    mensajes.forEach(([categoria, mensaje]) => {
+        const configuracion =
+            configuracionPorCategoria[categoria] ||
+            configuracionPorCategoria.info;
+
+        Swal.fire({
+            icon: configuracion.icon,
+            title: configuracion.title,
+            text: mensaje,
+            confirmButtonText: "Aceptar",
+            confirmButtonColor: "#7c3aed",
+            background: "#171320",
+            color: "#ffffff"
+        });
+    });
+
+    document.querySelectorAll(".form-eliminar").forEach((formulario) => {
+        formulario.addEventListener("submit", (evento) => {
+            evento.preventDefault();
+
+            const nombre =
+                formulario.dataset.nombre || "este usuario";
+
+            Swal.fire({
+                icon: "warning",
+                title: "¿Eliminar usuario?",
+                text: `Se eliminará permanentemente a ${nombre}.`,
+                showCancelButton: true,
+                confirmButtonText: "Sí, eliminar",
+                cancelButtonText: "Cancelar",
+                confirmButtonColor: "#dc3545",
+                cancelButtonColor: "#6c757d",
+                background: "#171320",
+                color: "#ffffff",
+                reverseButtons: true
+            }).then((resultado) => {
+                if (resultado.isConfirmed) {
+                    formulario.submit();
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

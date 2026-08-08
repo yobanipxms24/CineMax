@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión | CineMax+</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <style>
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top, #5624a8, transparent 45%),
+                linear-gradient(135deg, #05030a, #121022);
+            color: white;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 430px;
+            padding: 40px;
+            background: rgba(18, 16, 34, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45);
+        }
+
+        .brand {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #a970ff;
+        }
+
+        .form-control {
+            background: #211d35;
+            border-color: #3b3456;
+            color: white;
+        }
+
+        .form-control:focus {
+            background: #211d35;
+            color: white;
+            border-color: #9b67ff;
+            box-shadow: 0 0 0 .25rem rgba(155, 103, 255, .2);
+        }
+
+        .btn-login {
+            background: linear-gradient(90deg, #7c3aed, #a855f7);
+            border: none;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body class="d-flex justify-content-center align-items-center p-3">
+
+    <main class="login-card">
+        <div class="text-center mb-4">
+            <div class="brand">CineMax+</div>
+            <p class="text-secondary">Accede al panel de administración</p>
+        </div>
+
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+            {% for categoria, mensaje in mensajes %}
+                <div class="alert alert-{{ categoria }}">
+                    {{ mensaje }}
+                </div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label">Usuario</label>
+                <input
+                    type="text"
+                    name="usuario"
+                    class="form-control form-control-lg"
+                    required
+                >
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Contraseña</label>
+                <input
+                    type="password"
+                    name="password"
+                    class="form-control form-control-lg"
+                    required
+                >
+            </div>
+
+            <button class="btn btn-login btn-lg text-white w-100">
+                Iniciar sesión
+            </button>
+        </form>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('index') }}" class="text-decoration-none text-light">
+                Volver al inicio
+            </a>
+        </div>
+    </main>
+
+</body>
+</html>
